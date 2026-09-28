@@ -20,6 +20,4 @@ The skill uses the Romeid MCP tool when available, then the [`@mglnb/romeid` CLI
 - [`skills/romeid-flowchart/references/flowchart-syntax.md`](skills/romeid-flowchart/references/flowchart-syntax.md): supported Mermaid syntax
 - [`skills/romeid-flowchart/scripts/share.mjs`](skills/romeid-flowchart/scripts/share.mjs): offline link generation
 
-The source is maintained in [Romeid's project repository](https://github.com/mglnb/romeid) under `skills/romeid-flowchart/`.
-
 MIT © 2026 mglnb
