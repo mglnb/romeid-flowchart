@@ -28,6 +28,8 @@ flowchart TD   %% TD/TB top→bottom, BT bottom→top, LR left→right, RL right
 
 A node is declared the first time it appears; later references use only the id.
 
+For a node representing a named service or technology, place a verified icon token at the start of a quoted label: `db["{aws:amazon-rds} Amazon RDS"]` or `api["{dev:nodejs} Node.js API"]`. The token stays in the Mermaid source, and Romeid renders the icon. See [icons.md](icons.md) for IDs and selection rules.
+
 ## Edges
 
 | Syntax | Meaning |

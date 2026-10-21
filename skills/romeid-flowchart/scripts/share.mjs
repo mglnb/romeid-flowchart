@@ -6,6 +6,7 @@
  * real Mermaid parser; use this when neither is available (offline, sandboxed).
  *
  *   node share.mjs diagram.mmd --title "Checkout"
+ *   node share.mjs diagram.mmd --notes notes.json   # {"nodeId": "Markdown note", ...}
  *   cat diagram.mmd | node share.mjs --json
  */
 import { readFileSync, realpathSync } from "node:fs";
@@ -141,11 +142,31 @@ const APPEARANCE = {
   edgeStyle: ["orthogonal", "curved", "straight"],
 };
 
-export function buildLink({ code, title, settings = {} }, base) {
+/* Step notes: Markdown keyed by node id, same limits as the site (code points). */
+const NOTE_LIMITS = { note: 2000, total: 20000, count: 200, id: 100 };
+
+export function cleanNotes(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return undefined;
+  const entries = [];
+  let total = 0;
+  for (const id of Object.keys(input).sort()) {
+    const raw = input[id];
+    const idLength = Array.from(id).length;
+    if (typeof raw !== "string" || !idLength || idLength > NOTE_LIMITS.id || /[\s\p{Cc}]/u.test(id)) continue;
+    const text = Array.from(raw.trim()).slice(0, NOTE_LIMITS.note);
+    if (!text.length || entries.length >= NOTE_LIMITS.count || total + text.length > NOTE_LIMITS.total) continue;
+    total += text.length;
+    entries.push([id, text.join("")]);
+  }
+  return entries.length ? Object.fromEntries(entries) : undefined;
+}
+
+export function buildLink({ code, title, settings = {}, notes }, base) {
   const clean = {};
   for (const [key, allowed] of Object.entries(APPEARANCE)) if (allowed.includes(settings[key])) clean[key] = settings[key];
   if (settings.perspective === true) clean.perspective = true;
-  const doc = { code, ...(title ? { title } : {}), ...(Object.keys(clean).length ? { settings: clean } : {}) };
+  const stepNotes = cleanNotes(notes);
+  const doc = { code, ...(title ? { title } : {}), ...(Object.keys(clean).length ? { settings: clean } : {}), ...(stepNotes ? { notes: stepNotes } : {}) };
   const url = new URL(base || process.env.ROMEID_URL || DEFAULT_BASE_URL);
   url.hash = "";
   return `${url.toString()}#d=${compressToEncodedURIComponent(JSON.stringify(doc))}`;
@@ -162,6 +183,7 @@ async function main() {
       colors: { type: "string" },
       edges: { type: "string" },
       "3d": { type: "boolean" },
+      notes: { type: "string" },
       base: { type: "string" },
       force: { type: "boolean" },
       json: { type: "boolean" },
@@ -183,10 +205,16 @@ async function main() {
     return;
   }
 
+  let notes;
+  if (values.notes) {
+    notes = JSON.parse(readFileSync(values.notes, "utf8"));
+    if (!notes || typeof notes !== "object" || Array.isArray(notes)) throw new Error("--notes must be a JSON object mapping node ids to Markdown strings.");
+  }
   const url = buildLink(
     {
       code,
       title: values.title,
+      notes,
       settings: { palette: values.palette, nodeStyle: values.style, colorMode: values.colors, edgeStyle: values.edges, perspective: values["3d"] },
     },
     values.base,

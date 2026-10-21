@@ -18,6 +18,7 @@ The skill uses the Romeid MCP tool when available, then the [`@mglnb/romeid` CLI
 
 - [`skills/romeid-flowchart/SKILL.md`](skills/romeid-flowchart/SKILL.md): workflow and writing guidance
 - [`skills/romeid-flowchart/references/flowchart-syntax.md`](skills/romeid-flowchart/references/flowchart-syntax.md): supported Mermaid syntax
+- [`skills/romeid-flowchart/references/icons.md`](skills/romeid-flowchart/references/icons.md): verified AWS and technology icon ids
 - [`skills/romeid-flowchart/scripts/share.mjs`](skills/romeid-flowchart/scripts/share.mjs): offline link generation
 
 MIT © 2026 mglnb
